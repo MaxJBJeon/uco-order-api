@@ -1,8 +1,11 @@
 const express = require('express');
 const { google } = require('googleapis');
 const app = express();
+
+// 포트 설정
 const PORT = process.env.PORT || 3000;
 
+// 환경 변수
 const SHEET_ID = process.env.GOOGLE_SHEET_ID;
 const SHEET_NAME = 'New';
 
@@ -14,20 +17,22 @@ const auth = new google.auth.GoogleAuth({
   scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
 });
 
+app.get('/', (req, res) => {
+  res.send('✅ UCO Order API is running');
+});
+
 app.get('/check', async (req, res) => {
   const storeId = req.query.storeId;
-  if (!storeId) {
-    return res.status(400).send('Missing storeId');
-  }
+  if (!storeId) return res.status(400).send('Missing storeId');
 
   try {
     const sheets = google.sheets({ version: 'v4', auth: await auth.getClient() });
-    const result = await sheets.spreadsheets.values.get({
+    const response = await sheets.spreadsheets.values.get({
       spreadsheetId: SHEET_ID,
-      range: `${SHEET_NAME}!C2:C`, // C열만 조회
+      range: `${SHEET_NAME}!C2:C`,
     });
 
-    const rows = result.data.values || [];
+    const rows = response.data.values || [];
     const exists = rows.flat().includes(storeId);
 
     res.send(exists ? 'EXISTS' : 'NOT_FOUND');
@@ -37,10 +42,4 @@ app.get('/check', async (req, res) => {
   }
 });
 
-app.get('/', (req, res) => {
-  res.send('UCO Order API is running');
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+module.exports = app;
