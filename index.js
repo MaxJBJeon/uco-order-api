@@ -2,10 +2,7 @@ const express = require('express');
 const { google } = require('googleapis');
 const app = express();
 
-// 포트 설정
 const PORT = process.env.PORT || 3000;
-
-// 환경 변수
 const SHEET_ID = process.env.GOOGLE_SHEET_ID;
 const SHEET_NAME = 'New';
 
